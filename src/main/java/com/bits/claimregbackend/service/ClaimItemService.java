@@ -13,8 +13,7 @@ public class ClaimItemService {
     private static final String ENTITY_DOES_NOT_EXIST = "ENTITY DOES NOT EXIST!";
 
     public ClaimItem createClaimItem(ClaimItem claimItem) {
-        repository.save(claimItem);
-        return claimItem;
+        return repository.save(claimItem);
     }
 
     public ClaimItem getClaimItem(Long id) {
