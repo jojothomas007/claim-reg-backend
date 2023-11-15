@@ -1,7 +1,7 @@
 package com.bits.claimregbackend.service;
 
 import com.bits.claimregbackend.entity.ClaimItem;
-import com.bits.claimregbackend.repository.ClaimItemRespository;
+import com.bits.claimregbackend.repository.ClaimItemRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -9,17 +9,17 @@ import org.springframework.stereotype.Service;
 @Service
 public class ClaimItemService {
     @Autowired
-    ClaimItemRespository respository;
+    ClaimItemRepository repository;
     private static final String ENTITY_DOES_NOT_EXIST = "ENTITY DOES NOT EXIST!";
 
     public ClaimItem createClaimItem(ClaimItem claimItem) {
-        respository.save(claimItem);
+        repository.save(claimItem);
         return claimItem;
     }
 
     public ClaimItem getClaimItem(Long id) {
         try {
-            return respository.getReferenceById(id);
+            return repository.getReferenceById(id);
         } catch (Exception e) {
             throw new RuntimeException(String.format("%s : %s", HttpStatus.NOT_FOUND, ENTITY_DOES_NOT_EXIST));
         }
@@ -30,7 +30,7 @@ public class ClaimItemService {
     }
 
     public void deleteClaimItem(ClaimItem claimItem) {
-        respository.delete(claimItem);
+        repository.delete(claimItem);
     }
 
 }

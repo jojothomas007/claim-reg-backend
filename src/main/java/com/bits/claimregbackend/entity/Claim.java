@@ -18,10 +18,10 @@ public class Claim {
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     @Column(name = "claim_id")
     private Long id;
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "claimant_id", referencedColumnName = "employee_id", nullable = false)
     private Employee claimant;
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "approver_id", referencedColumnName = "employee_id", nullable = false)
     private Employee approver;
     @Column(nullable = false)

@@ -1,25 +1,20 @@
 package com.bits.claimregbackend.entity;
 
-import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+public enum Role {
+    APPROVER("Approver"),
+    SUBMITTER("Submitter");
+    public final String value;
 
-import java.util.List;
+    private Role(String value) {
+        this.value = value;
+    }
 
-@Entity
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-@Builder
-public class Role {
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    @Column(name = "role_id")
-    private Long id;
-    @Column(nullable = false)
-    private String name;
-    @ManyToMany
-    private List<Permission> permissions;
+    public static Role valueOfFieldName(String value) {
+        for (Role e : values()) {
+            if (e.value.equals(value)) {
+                return e;
+            }
+        }
+        return null;
+    }
 }

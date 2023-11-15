@@ -11,6 +11,7 @@ import java.security.InvalidParameterException;
 import java.util.List;
 
 @RestController
+@CrossOrigin(origins = "*")
 public class ClaimController {
     @Autowired
     ClaimService claimService;
@@ -36,22 +37,19 @@ public class ClaimController {
     public Claim fetchClaimById(@PathVariable("id") Long claimId) {
         return claimService.getClaim(claimId);
     }
-
+    
     @GetMapping("/claims")
     public List<Claim> fetchClaims(@RequestParam String status) {
         List<Claim> claimList;
         switch (status) {
+            case "created":
+                claimList = claimService.viewCreatedClaims();
+                break;
             case "submitted":
                 claimList = claimService.viewSubmittedClaims();
                 break;
             case "approved":
                 claimList = claimService.viewApprovedClaims();
-                break;
-            case "forApproval":
-                claimList = claimService.viewClaimsForApproval();
-                break;
-            case "draft":
-                claimList = claimService.viewDraftClaims();
                 break;
             default:
                 throw new InvalidParameterException("Invalid status!");

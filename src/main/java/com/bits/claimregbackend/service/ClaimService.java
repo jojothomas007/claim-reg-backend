@@ -2,7 +2,7 @@ package com.bits.claimregbackend.service;
 
 import com.bits.claimregbackend.entity.Claim;
 import com.bits.claimregbackend.entity.ClaimItem;
-import com.bits.claimregbackend.repository.ClaimRespository;
+import com.bits.claimregbackend.repository.ClaimRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -11,10 +11,10 @@ import java.util.List;
 @Service
 public class ClaimService {
     @Autowired
-    ClaimRespository respository;
+    ClaimRepository repository;
 
     public Claim createClaim(Claim claim) {
-        respository.save(claim);
+        repository.save(claim);
         return claim;
     }
 
@@ -26,18 +26,6 @@ public class ClaimService {
         return null;
     }
 
-    public Claim approveClaim(Claim claim) {
-        return null;
-    }
-
-    public List<Claim> viewSubmittedClaims() {
-        return null;
-    }
-
-    public List<Claim> viewClaimsForApproval() {
-        return null;
-    }
-
     public void deleteClaim() {
     }
 
@@ -45,11 +33,16 @@ public class ClaimService {
         return new Claim();
     }
 
-    public List<Claim> viewApprovedClaims() {
-        return null;
+    public List<Claim> viewCreatedClaims() {
+        return repository.findAll();
     }
 
-    public List<Claim> viewDraftClaims() {
-        return null;
+    public List<Claim> viewSubmittedClaims() {
+        return repository.findAll();
     }
+
+    public List<Claim> viewApprovedClaims() {
+        return repository.findAll();
+    }
+
 }

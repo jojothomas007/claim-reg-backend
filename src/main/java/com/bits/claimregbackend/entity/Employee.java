@@ -20,9 +20,8 @@ public class Employee {
     private String name;
     @Column(nullable = false)
     private String department;
-    @ManyToOne
-    @JoinColumn(name = "role_id", nullable = false)
-    private Role role;
     @Column(nullable = false)
     private String team;
+    @Column(nullable = false)
+    private Boolean isApprover;
 }
