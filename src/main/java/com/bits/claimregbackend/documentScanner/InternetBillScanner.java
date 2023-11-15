@@ -11,15 +11,21 @@ import com.azure.core.util.polling.SyncPoller;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 public class InternetBillScanner {
     private static final String modelId = "composed-model";
     private static final String endpoint = "https://claimsreg.cognitiveservices.azure.com";
     private static final String key = "682037791b864ec68270a3d6ce6fcd41";
 
-    public InternetBillScanResult scanInvoice(Path filePath) throws IOException {
+    public List<DocField> scanInvoice(Path filePath) throws IOException {
         DocumentAnalysisClient documentAnalysisClient = new DocumentAnalysisClientBuilder()
                 .credential(new AzureKeyCredential(key))
                 .endpoint(endpoint)
@@ -32,34 +38,52 @@ public class InternetBillScanner {
         final AnalyzedDocument analyzedDocument = analyzeResult.getDocuments().get(0);
         Map<InternetBillFields, DocField> scanResult = new HashMap();
         InternetBillScanResult internetBillScanResult = new InternetBillScanResult();
+        List<DocField> docFieldList = new ArrayList<>();
         analyzedDocument.getFields().forEach((key, documentField) -> {
             DocField docField = new DocField();
             docField.setKey(key);
-            docField.setValue(documentField.getContent());
             docField.setConfidence(documentField.getConfidence());
+            //To handle different date formats in different documents. It should be ideally handled at Azure AI side
             switch (InternetBillFields.valueOfFieldName(key)) {
                 case SUBSCRIPTION_START_DATE:
-                    internetBillScanResult.setSubscriptionStartDate(docField);
-                    break;
                 case SUBSCRIPTION_END_DATE:
-                    internetBillScanResult.setSubscriptionEndDate(docField);
+                case INVOICE_DATE:
+                    String content = documentField.getContent();
+                    String formattedDate = "";
+                    if (Pattern.matches("([0-9]{2})/([0-9]{2})/([0-9]{4})", content)) {
+                        formattedDate = getFormattedDateString("dd/MM/yyyy", content);
+                    } else if (Pattern.matches("([0-9]{2})-([0-9]{2})-([0-9]{4})", content)) {
+                        formattedDate = getFormattedDateString("dd-MM-yyyy", content);
+                    } else if (Pattern.matches("([0-9]{2})-([a-z|A-Z]{3})-([0-9]{4})", content)) {
+                        formattedDate = getFormattedDateString("dd-MMM-yyyy", content);
+                    } else if (Pattern.matches("([0-9]{2}) ([a-z|A-Z]{3}) ([0-9]{4})", content)) {
+                        formattedDate = getFormattedDateString("dd MMM yyyy", content);
+                    } else formattedDate = content;
+                    docField.setValue(formattedDate);
                     break;
                 case INVOICE_NUMBER:
-                    internetBillScanResult.setInvoiceNumber(docField);
-                    break;
-                case INVOICE_DATE:
-                    internetBillScanResult.setInvoiceDate(docField);
-                    break;
                 case AMOUNT:
-                    internetBillScanResult.setAmount(docField);
-                    break;
                 case NAME:
-                    internetBillScanResult.setSubscriberName(docField);
-                    break;
                 default:
-                    new RuntimeException(String.format("'%s' - The scanned field not configured", key));
+                    docField.setValue(documentField.getContent());
+                    break;
             }
+            docFieldList.add(docField);
         });
-        return internetBillScanResult;
+        return docFieldList;
+    }
+
+    private static String getFormattedDateString(String pattern, String content) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
+        try {
+            LocalDate localDate = LocalDate.parse(content, formatter);
+            String result = localDate.format(formatter);
+            if (result.equalsIgnoreCase(content)) {
+                return localDate.format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+            }
+        } catch (DateTimeParseException exp) {
+            System.out.println("Date formatting was not successful");
+        }
+        return content;
     }
 }
