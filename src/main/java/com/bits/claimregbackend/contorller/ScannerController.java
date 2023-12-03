@@ -2,13 +2,12 @@ package com.bits.claimregbackend.contorller;
 
 import com.bits.claimregbackend.documentScanner.DocField;
 import com.bits.claimregbackend.documentScanner.InternetBillScanner;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -30,6 +29,16 @@ public class ScannerController {
             e.printStackTrace();
         }
         return null;
+    }
+
+    @PostMapping(value = "/scan-pdf-file", consumes = {"multipart/form-data"})
+    public List<DocField> scanPdfFile(@RequestParam(name = "file") MultipartFile file) {
+        try {
+            return new InternetBillScanner().scanInvoiceFile(file);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return new ArrayList<>();
     }
 
 //    private void printScannedValueAndConfidence(DocField docField) {

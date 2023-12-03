@@ -8,6 +8,7 @@ import com.azure.ai.formrecognizer.documentanalysis.models.OperationResult;
 import com.azure.core.credential.AzureKeyCredential;
 import com.azure.core.util.BinaryData;
 import com.azure.core.util.polling.SyncPoller;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -33,8 +34,22 @@ public class InternetBillScanner {
 
         SyncPoller<OperationResult, AnalyzeResult> analyzeDocumentPoller =
                 documentAnalysisClient.beginAnalyzeDocument(modelId, BinaryData.fromFile(filePath));
+        return analyzeResult(analyzeDocumentPoller.getFinalResult());
+    }
 
-        AnalyzeResult analyzeResult = analyzeDocumentPoller.getFinalResult();
+    public List<DocField> scanInvoiceFile(MultipartFile multipartFile) throws IOException {
+        DocumentAnalysisClient documentAnalysisClient = new DocumentAnalysisClientBuilder()
+                .credential(new AzureKeyCredential(key))
+                .endpoint(endpoint)
+                .buildClient();
+
+        SyncPoller<OperationResult, AnalyzeResult> analyzeDocumentPoller =
+                documentAnalysisClient.beginAnalyzeDocument(modelId, BinaryData.fromBytes(multipartFile.getBytes()));
+        return analyzeResult(analyzeDocumentPoller.getFinalResult());
+    }
+
+    private List<DocField> analyzeResult(AnalyzeResult analyzeResult) {
+
         final AnalyzedDocument analyzedDocument = analyzeResult.getDocuments().get(0);
         Map<InternetBillFields, DocField> scanResult = new HashMap();
         InternetBillScanResult internetBillScanResult = new InternetBillScanResult();
