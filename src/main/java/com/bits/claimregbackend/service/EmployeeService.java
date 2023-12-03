@@ -17,7 +17,7 @@ public class EmployeeService {
     }
 
     public List<Employee> getApprovers() {
-        return repository.findAll();
+        return repository.findByIsApprover(true);
     }
 
     public Employee getEmployee(Long id) {
